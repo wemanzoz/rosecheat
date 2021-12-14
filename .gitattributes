@@ -1,0 +1,2 @@
+*.h linguist-language=C++
+rose/freetype/** linguist-vendored
