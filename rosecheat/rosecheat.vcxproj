@@ -165,7 +165,7 @@
       <PrecompiledHeaderOutputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)$(TargetName)-c.pch</PrecompiledHeaderOutputFile>
     </ClCompile>
     <ClCompile Include="Netvars.cpp" />
-    <ClCompile Include="KOOL.cpp" />
+    <ClCompile Include="rosecheat.cpp" />
     <ClCompile Include="GUI.cpp" />
     <ClCompile Include="Hacks\Misc.cpp" />
     <ClCompile Include="Hooks.cpp" />
@@ -341,7 +341,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{81D9D7BB-A927-4EB6-9743-F73E6A1DEE48}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>KOOL</RootNamespace>
+    <RootNamespace>rosecheat</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <ProjectName>rosecheat</ProjectName>
   </PropertyGroup>
