@@ -656,7 +656,7 @@ void Misc::fixMovement(UserCmd* cmd, float yaw) noexcept {
 
 void Misc::antiAfk(UserCmd* cmd) noexcept {
     if (config->miscConfig.antiAfk && cmd->commandNumber % 2)
-        cmd->buttons |= 1 << 26;
+        cmd->buttons |= 1 << 27;
 }
 
 void Misc::fixAnimationLOD(FrameStage stage) noexcept {

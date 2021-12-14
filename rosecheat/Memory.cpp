@@ -22,8 +22,7 @@
 #include "SDK/LocalPlayer.h"
 
 template <typename T>
-static constexpr auto relativeToAbsolute(uintptr_t address) noexcept
-{
+static constexpr auto relativeToAbsolute(uintptr_t address) noexcept {
     return (T)(address + 4 + *reinterpret_cast<std::int32_t*>(address));
 }
 
@@ -32,8 +31,7 @@ struct ModuleInfo {
     std::size_t size;
 };
 
-static ModuleInfo getModuleInformation(const char* name) noexcept
-{
+static ModuleInfo getModuleInformation(const char* name) noexcept {
 #ifdef _WIN32
     if (HMODULE handle = GetModuleHandleA(name)) {
         if (MODULEINFO moduleInfo; GetModuleInformation(GetCurrentProcess(), handle, &moduleInfo, sizeof(moduleInfo)))
@@ -82,14 +80,13 @@ static ModuleInfo getModuleInformation(const char* name) noexcept
         moduleInfo->base = (void*)(info->dlpi_addr + info->dlpi_phdr[0].p_vaddr);
         moduleInfo->size = info->dlpi_phdr[0].p_memsz;
         return 1;
-    }, &moduleInfo);
+                    }, &moduleInfo);
 
     return ModuleInfo{ moduleInfo.base, moduleInfo.size };
 #endif
 }
 
-[[nodiscard]] static auto generateBadCharTable(std::string_view pattern) noexcept
-{
+[[nodiscard]] static auto generateBadCharTable(std::string_view pattern) noexcept {
     assert(!pattern.empty());
 
     std::array<std::size_t, (std::numeric_limits<std::uint8_t>::max)() + 1> table;
@@ -108,8 +105,7 @@ static ModuleInfo getModuleInformation(const char* name) noexcept
 }
 
 template <bool ReportNotFound = true>
-static std::uintptr_t findPattern(ModuleInfo moduleInfo, std::string_view pattern) noexcept
-{
+static std::uintptr_t findPattern(ModuleInfo moduleInfo, std::string_view pattern) noexcept {
     static auto id = 0;
     ++id;
 
@@ -141,13 +137,11 @@ static std::uintptr_t findPattern(ModuleInfo moduleInfo, std::string_view patter
 }
 
 template <bool ReportNotFound = true>
-static std::uintptr_t findPattern(const char* moduleName, std::string_view pattern) noexcept
-{
+static std::uintptr_t findPattern(const char* moduleName, std::string_view pattern) noexcept {
     return findPattern<ReportNotFound>(getModuleInformation(moduleName), pattern);
 }
 
-Memory::Memory() noexcept
-{
+Memory::Memory() noexcept {
 #ifdef _WIN32
     present = findPattern("gameoverlayrenderer", "\xFF\x15????\x8B\xF0\x85\xFF") + 2;
     reset = findPattern("gameoverlayrenderer", "\xC7\x45?????\xFF\x15????\x8B\xD8") + 9;
@@ -166,7 +160,7 @@ Memory::Memory() noexcept
     auto temp = reinterpret_cast<std::uintptr_t*>(findPattern(CLIENT_DLL, "\xB9????\xE8????\x8B\x5D\x08") + 1);
     hud = *temp;
     findHudElement = relativeToAbsolute<decltype(findHudElement)>(reinterpret_cast<uintptr_t>(temp) + 5);
-    clearHudWeapon = reinterpret_cast<decltype(clearHudWeapon)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x51\x53\x56\x8B\x75\x08\x8B\xD9\x57\x6B\xFE\x2C"));
+    clearHudWeapon = relativeToAbsolute<decltype(clearHudWeapon)>(findPattern(CLIENT_DLL, "\xE8????\x8B\xF0\xC6\x44\x24??\xC6\x44\x24") + 1);
     itemSystem = relativeToAbsolute<decltype(itemSystem)>(findPattern(CLIENT_DLL, "\xE8????\x0F\xB7\x0F") + 1);
     setAbsOrigin = relativeToAbsolute<decltype(setAbsOrigin)>(findPattern(CLIENT_DLL, "\xE8????\xEB\x19\x8B\x07") + 1);
     insertIntoTree = findPattern(CLIENT_DLL, "\x56\x52\xFF\x50\x18") + 5;
