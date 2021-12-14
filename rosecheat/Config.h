@@ -276,9 +276,6 @@ public:
 
         struct TeamDamageList {
             bool enabled = false;
-            bool noTitleBar = false;
-            ImVec2 pos;
-            ImVec2 size{ 400.0f, 400.0f };
         }; TeamDamageList teamDamageList;
 
         struct PreserveKillfeed {

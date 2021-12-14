@@ -572,9 +572,6 @@ static void from_json(const json& j, Config::MiscConfig::PurchaseList& pl) {
 
 static void from_json(const json& j, Config::MiscConfig::TeamDamageList& dl) {
     read(j, "Enabled", dl.enabled);
-    read(j, "No Title Bar", dl.noTitleBar);
-    read<value_t::object>(j, "Pos", dl.pos);
-    read<value_t::object>(j, "Size", dl.size);
 }
 
 static void from_json(const json& j, Config::MiscConfig::OffscreenEnemies& o) {
@@ -683,12 +680,6 @@ static void to_json(json& j, const Config::MiscConfig::PurchaseList& o, const Co
 
 static void to_json(json& j, const Config::MiscConfig::TeamDamageList& o, const Config::MiscConfig::TeamDamageList& dummy = {}) {
     WRITE("Enabled", enabled);
-    WRITE("No Title Bar", noTitleBar);
-
-    if (const auto window = ImGui::FindWindowByName("Team Damage List")) {
-        j["Pos"] = window->Pos;
-        j["Size"] = window->SizeFull;
-    }
 }
 
 static void to_json(json& j, const Config::MiscConfig::OffscreenEnemies& o, const Config::MiscConfig::OffscreenEnemies& dummy = {}) {

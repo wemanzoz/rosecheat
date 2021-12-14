@@ -328,43 +328,22 @@ void Misc::teamDamageList(GameEvent* event) noexcept {
     if (event) {
         // If the event is player_hurt
         if (fnv::hashRuntime("player_hurt")) {
-            // Getting the attacker, checking if it exists, if you exist, etc
+            // Getting the attacker
             if (const auto player = interfaces->entityList->getEntity(interfaces->engine->getPlayerForUserID(event->getInt("attacker"))); player && localPlayer && !localPlayer->isOtherEnemy(player)) {
                 // Add the damage dealt to the team member
                 playerDamage[player->handle()].damage += (event->getInt("dmg_health") + event->getInt("dmg_armor"));
             }
 
-            // If the position is non-existent or invalid
-            if (config->miscConfig.teamDamageList.pos != ImVec2{}) {
-                ImGui::SetNextWindowPos(config->miscConfig.teamDamageList.pos);
-                config->miscConfig.teamDamageList.pos = {};
-            }
-
-            // If the size is non-existent or invalid
-            if (config->miscConfig.teamDamageList.size != ImVec2{}) {
-                ImGui::SetNextWindowSize(ImClamp(config->miscConfig.teamDamageList.size, {}, ImGui::GetIO().DisplaySize));
-                config->miscConfig.teamDamageList.size = {};
-            }
-
-            // Setting window stuff
-            ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoCollapse;
-            if (!gui->isOpen())
-                windowFlags |= ImGuiWindowFlags_NoInputs;
-            if (config->miscConfig.spectatorList.noTitleBar)
-                windowFlags |= ImGuiWindowFlags_NoTitleBar;
-
-            if (!gui->isOpen())
-                ImGui::PushStyleColor(ImGuiCol_TitleBg, ImGui::GetColorU32(ImGuiCol_TitleBgActive));
-
             ImGui::PushStyleVar(ImGuiStyleVar_WindowTitleAlign, { 0.5f, 0.5f });
-            ImGui::Begin("Team Damage List", nullptr, windowFlags);
+            ImGui::Begin("Team Damage List", nullptr, ImGuiWindowFlags_NoCollapse);
             ImGui::PopStyleVar();
 
-            if (!gui->isOpen())
-                ImGui::PopStyleColor();
+            ImGui::ShowMetricsWindow();
 
+            // Getting the ImGui Draw List
             ImDrawList* drawList = ImGui::GetWindowDrawList();
             for (const auto& player : GameData::players()) {
+                // If the player isn't an enemy
                 if (!localPlayer->isOtherEnemy(interfaces->entityList->getEntityFromHandle(localPlayer->handle())))
                     continue;
 

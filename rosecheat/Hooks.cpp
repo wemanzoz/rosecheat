@@ -121,12 +121,13 @@ static void swapWindow(SDL_Window * window) noexcept {
 
     if (const auto& displaySize = ImGui::GetIO().DisplaySize; displaySize.x > 0.0f && displaySize.y > 0.0f) {
         StreamProofESP::render();
+        Misc::spectatorList();
         Misc::purchaseList();
+        Misc::teamDamageList();
         Misc::noscopeCrosshair(ImGui::GetBackgroundDrawList());
         Misc::recoilCrosshair(ImGui::GetBackgroundDrawList());
         Misc::drawOffscreenEnemies(ImGui::GetBackgroundDrawList());
         Misc::drawBombTimer();
-        Misc::spectatorList();
         Visuals::hitMarker(nullptr, ImGui::GetBackgroundDrawList());
         Visuals::drawMolotovHull(ImGui::GetBackgroundDrawList());
         Misc::watermark();
@@ -165,7 +166,7 @@ static void swapWindow(SDL_Window * window) noexcept {
 #else
     hooks->swapWindow(window);
 #endif
-}
+    }
 
 static bool __STDCALL createMove(LINUX_ARGS(void* thisptr, ) float inputSampleTime, UserCmd * cmd) noexcept {
     auto result = hooks->clientMode.callOriginal<bool, WIN32_LINUX(24, 25)>(inputSampleTime, cmd);
@@ -313,12 +314,12 @@ static bool __STDCALL shouldDrawFog(LINUX_ARGS(void* thisptr)) noexcept {
         if (*static_cast<std::uint32_t*>(_ReturnAddress()) == 0x6274C084) {
             static const auto returnAddress = std::uintptr_t(_ReturnAddress());
             assert(returnAddress == std::uintptr_t(_ReturnAddress()));
-        }
+}
 #endif
 
         if (*static_cast<std::uint32_t*>(_ReturnAddress()) != 0x6274C084)
             return hooks->clientMode.callOriginal<bool, 17>();
-    }
+}
 #endif
 
     return !Visuals::shouldRemoveFog();

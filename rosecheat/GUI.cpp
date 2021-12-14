@@ -1272,7 +1272,6 @@ void GUI::renderMiscWindow(bool contentOnly) noexcept {
         ImGui::OpenPopup("");
 
     if (ImGui::BeginPopup("")) {
-        ImGui::Checkbox("No Title Bar", &config->miscConfig.teamDamageList.noTitleBar);
         ImGui::Text("uwu");
         ImGui::EndPopup();
     }
