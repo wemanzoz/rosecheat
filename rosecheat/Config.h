@@ -298,6 +298,8 @@ public:
     struct Style {
         int menuStyle{ 0 };
         int menuColours{ 0 };
+        std::string customFont{ "" };
+        int customFontSize{ 0 };
         ColorToggle3 menuColour{ 0.6f, 0.0f, 0.6f };
     } styleConfig;
 

@@ -1162,7 +1162,6 @@ void GUI::renderVisualsWindow(bool contentOnly) noexcept {
 }
 
 // INVENTORY CHANGER
-
 // I couldn't put the Inventory Changer GUI code here because of linker errors.
 
 // STYLE
@@ -1186,16 +1185,51 @@ void GUI::renderStyleWindow(bool contentOnly) noexcept {
         updateColors();
     ImGui::PopItemWidth();
 
-    if (config->styleConfig.menuColours == 3) {
-        for (int i = 0; i < ImGuiCol_COUNT; i++) {
-            if (i && i & 3) ImGui::SameLine(220.0f * (i & 3));
+    ImGui::PushID("Custom Menu Font");
+    if (ImGui::Button("Custom Menu Font"))
+        ImGui::OpenPopup("");
 
-            ImGuiCustom::colorPicker(ImGui::GetStyleColorName(i), (float*)&style.Colors[i], &style.Colors[i].w);
+    if (ImGui::BeginPopup("")) {
+        ImGuiIO& io = ImGui::GetIO();
+        ImFont* font_current = ImGui::GetFont();
+        if (ImGui::BeginCombo("Menu Font", font_current->GetDebugName())) {
+            for (int n = 0; n < io.Fonts->Fonts.Size; n++) {
+                ImFont* font = io.Fonts->Fonts[n];
+                ImGui::PushID((void*)font);
+                if (ImGui::Selectable(font->GetDebugName(), font == font_current))
+                    io.FontDefault = font;
+                ImGui::PopID();
+            }
+            ImGui::EndCombo();
         }
-    }
+#ifdef _WIN32
+        ImGui::InputText("TTF Name", &config->styleConfig.customFont);
+        ImGui::InputInt("TTF Size", &config->styleConfig.customFontSize);
+        if (ImGui::Button("Add Font")) {
+            ImFontConfig cfg;
+            cfg.SizePixels = config->styleConfig.customFontSize;
 
-    if (!contentOnly)
-        ImGui::End();
+            ImFont* customFont = io.Fonts->AddFontFromFileTTF(config->styleConfig.customFont.c_str(), config->styleConfig.customFontSize, &cfg, Helpers::getFontGlyphRanges());
+            if (!customFont) {
+                ImGui::Text("!customFont");
+                io.Fonts->AddFontDefault(&cfg);
+            }
+            ImGui::EndPopup();
+        }
+#endif
+        ImGui::PopID();
+
+        if (config->styleConfig.menuColours == 3) {
+            for (int i = 0; i < ImGuiCol_COUNT; i++) {
+                if (i && i & 3) ImGui::SameLine(220.0f * (i & 3));
+
+                ImGuiCustom::colorPicker(ImGui::GetStyleColorName(i), (float*)&style.Colors[i], &style.Colors[i].w);
+            }
+        }
+
+        if (!contentOnly)
+            ImGui::End();
+    }
 }
 
 // MISC

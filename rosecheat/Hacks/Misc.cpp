@@ -219,7 +219,7 @@ void Misc::purchaseList(GameEvent* event) noexcept {
     std::scoped_lock _{ mtx };
 
     struct PlayerPurchases {
-        int totalCost;
+        int totalCost{ 0 };
         std::unordered_map<std::string, int> items;
     };
 
@@ -320,41 +320,58 @@ void Misc::teamDamageList(GameEvent* event) noexcept {
     static std::mutex mtx;
     std::scoped_lock _{ mtx };
 
-    struct PlayerDamage {
-        int damage;
-    }; static std::unordered_map<int, PlayerDamage> playerDamage;
+    struct PlayerDamage { int damage{ 0 }; };
+    static std::unordered_map<int, PlayerDamage> playerDamage;
 
-    // If the event exists
+    // If the user is not in a match
+    if (!interfaces->engine->isInGame())
+        playerDamage.clear();
+
+    // If the event is updated
     if (event) {
         // If the event is player_hurt
-        if (fnv::hashRuntime("player_hurt")) {
-            // Getting the attacker
-            if (const auto player = interfaces->entityList->getEntity(interfaces->engine->getPlayerForUserID(event->getInt("attacker"))); player && localPlayer && !localPlayer->isOtherEnemy(player)) {
-                // Add the damage dealt to the team member
-                playerDamage[player->handle()].damage += (event->getInt("dmg_health") + event->getInt("dmg_armor"));
-            }
+        switch (fnv::hashRuntime(event->getName())) {
+            case fnv::hash("player_hurt"):
+                // Getting the attacker
+                if (const auto player = interfaces->entityList->getEntity(interfaces->engine->getPlayerForUserID(event->getInt("attacker"))); player && localPlayer && !localPlayer->isOtherEnemy(player)) {
+                    // Add the damage dealt to the team member
+                    playerDamage[player->handle()].damage += (event->getInt("dmg_health") + event->getInt("dmg_armor"));
+                }
+                break;
+        }
+    }
+    else { // Draw the window
+        if (!config->miscConfig.teamDamageList.enabled)
+            return;
 
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowTitleAlign, { 0.5f, 0.5f });
-            ImGui::Begin("Team Damage List", nullptr, ImGuiWindowFlags_NoCollapse);
-            ImGui::PopStyleVar();
+        if (!gui->isOpen())
+            return;
 
-            ImGui::ShowMetricsWindow();
+        ImGui::SetNextWindowSize({ 200.0f, 200.0f }, ImGuiCond_Once);
 
-            // Getting the ImGui Draw List
-            ImDrawList* drawList = ImGui::GetWindowDrawList();
-            for (const auto& player : GameData::players()) {
-                // If the player isn't an enemy
-                if (!localPlayer->isOtherEnemy(interfaces->entityList->getEntityFromHandle(localPlayer->handle())))
-                    continue;
+        ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoCollapse;
 
-                if (const auto it = std::ranges::find(GameData::players(), player.handle, &PlayerData::handle); it != GameData::players().cend()) {
-                    if (const auto texture = it->getAvatarTexture()) {
-                        const auto textSize = ImGui::CalcTextSize(it->name.c_str());
-                        ImGui::Image(texture, ImVec2(textSize.y, textSize.y), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1), ImVec4(1, 1, 1, 0.3f));
-                        ImGui::SameLine();
-                        ImGui::TextWrapped("%s", it->name.c_str());
-                        //drawList->AddRectFilled(ImGui::GetItemRectSize());
-                    }
+        if (!gui->isOpen())
+            windowFlags |= ImGuiWindowFlags_NoInputs;
+
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowTitleAlign, { 0.5f, 0.5f });
+        ImGui::Begin("Team Damage List", nullptr, windowFlags);
+        ImGui::PopStyleVar();
+
+        // Getting the ImGui Draw List
+        ImDrawList* drawList = ImGui::GetWindowDrawList();
+        for (const auto& player : GameData::players()) {
+            // If the player isn't an enemy
+            if (!localPlayer->isOtherEnemy(interfaces->entityList->getEntityFromHandle(localPlayer->handle())))
+                continue;
+
+            if (const auto it = std::ranges::find(GameData::players(), player.handle, &PlayerData::handle); it != GameData::players().cend()) {
+                if (const auto texture = it->getAvatarTexture()) {
+                    const auto textSize = ImGui::CalcTextSize(it->name.c_str());
+                    ImGui::Image(texture, ImVec2(textSize.y, textSize.y), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1), ImVec4(1, 1, 1, 0.3f));
+                    ImGui::SameLine();
+                    ImGui::TextWrapped("%s", it->name.c_str());
+                    //drawList->AddRectFilled(ImGui::GetItemRectSize());
                 }
             }
         }
